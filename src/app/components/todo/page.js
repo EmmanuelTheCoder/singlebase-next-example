@@ -21,6 +21,151 @@ const getAuthToken = localStorage.getItem("user-auth-token")
 export default function page() {
   
 
+//  const searchParams = useSearchParams();
+//  const display_name = searchParams.get('display_name');
+//  const userkey = searchParams.get('userkey');
+ 
+ 
+
+
+
+const router = useRouter()
+
+
+const [todoTask, setTodoTask] = useState("")
+const [fetchTodo, setFetchTodo] = useState([])
+const [isPending, startTransition] = useTransition()
+
+const [isFetching, setIsFetching] = useState(false)
+ 
+ async function caller () {
+  const SBC_CONFIG  = {
+    api_url: apiUrl,
+    api_key: apiKey,
+    options: {
+      headers: {
+        "Authorization" : `Bearer ${getAuthToken}`
+      }
+    }
+    
+  }
+  
+  
+  const sbc = createClient(SBC_CONFIG)
+
+  const res = await sbc
+  .collection("todos")
+  .fetch()
+
+  setFetchTodo(res.data);
+}
+
+ const fetchAllTasks = async () => {
+  //  await axios ({
+  //   method: "POST",
+  //   url: apiUrl,
+  //   headers: {
+  //       "X-API-KEY": apiKey,
+  //       "Authorization": `Bearer ${getAuthToken}`
+  //   },
+  //   data: {
+  //     action: "db.fetch",
+  //     collection: "todos"
+  //   }
+  // }).then(async (res)  => {
+  //   const data = await res.data.data
+  //   setFetchTodo(data)
+  //   console.log("res from api fetch", data)
+
+    
+  // })
+  
+
+  const res = await singlebase
+  .collection("todos")
+  .fetch()
+
+  setFetchTodo(res.data);
+
+  // startTransition(() => {
+  //   router.refresh()
+  // })
+}
+
+useEffect(() => {
+
+  //caller()
+  fetchAllTasks() 
+  router.refresh()
+
+  // startTransition(() => {
+  //   router.refresh()
+  // })
+
+ }, [isFetching])
+
+
+  const addTodo = async () => {
+
+    setIsFetching(true)
+
+      const res = await singlebase
+      .collection("todos")
+      .insert({
+        task: todoTask,
+        isDone: false
+      })
+      setIsFetching(false)
+
+      console.log("add todo", res)
+      setTodoTask("")
+    
+      
+  }
+
+  
+  const updateTodo = async(key, val) => {
+
+    setIsFetching(true)
+
+    const res = await singlebase
+    .collection("todos")
+    .setDoc(key, {
+      isDone: val
+    })
+    
+
+    console.log("update todo response ", res)
+    
+     setIsFetching(false)
+     
+    router.refresh()
+    
+  }
+
+  const deleteATask = async (key) => {
+    setIsFetching(true)
+
+    const res = await singlebase 
+    .collection("todos")
+    .deleteDoc(key)
+
+    console.log("task deleted", res)
+    setIsFetching(false)
+
+  }
+
+  const signout = async (id_token) => {
+    const res = await singlebase
+    .auth
+    .signOut(id_token)
+
+    console.log("signed out", res)
+
+    if(res.ok) {
+      router.push("/")
+    }
+  }
   
   return (
     <div className='todo-container'>
