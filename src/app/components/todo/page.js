@@ -1,7 +1,7 @@
 "use client"
 import React, { useEffect, useState} from 'react'
 import { useRouter } from 'next/navigation';
-import { singlebaseClient } from 'utils/singlebaseclient'
+import { singlebaseClient } from '@/app/utils/singlebaseclient'
 import Image from 'next/image';
 import deleteimg from '/public/images/delete.png';
 

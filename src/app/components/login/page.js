@@ -1,7 +1,7 @@
 "use client"
 import React, {useState} from 'react'
 import Link from 'next/link'
-import { singlebaseClient } from 'utils/singlebaseclient'; 
+import { singlebaseClient } from '@/app/utils/singlebaseclient'; 
 import { useRouter } from 'next/navigation';
 
 export default function page() {
