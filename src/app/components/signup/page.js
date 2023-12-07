@@ -1,29 +1,11 @@
 "use client"
-import { useState, useEffect } from 'react'
-import { singlebase } from "@/app/utils/singlebaseclient"
+import { useState } from 'react'
+import { singlebaseClient } from "utils/singlebaseclient"
 import { useRouter } from 'next/navigation'
 
 
 function page() {
 const router = useRouter()
-  useEffect(() => {
-
-    const fetchInfo = async () => {
-
-      const { data, error, ok } = await singlebase
-        .collection('candles')
-        .fetch()
-    
-        if (ok) {
-          for (const candle of data) {
-            console.log(candle?.name)
-          }
-        } else {
-          console.error('Something wrong!')
-        }
-    }
-    fetchInfo()
-  }, [])
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -32,6 +14,7 @@ const router = useRouter()
 
   const handleSignUp = async (e) => {
     e.preventDefault();
+      const singlebase = await singlebaseClient()
 
       const res = await singlebase
       .auth
@@ -44,9 +27,7 @@ const router = useRouter()
       setResponse(res)
       if(res.ok === true){
         localStorage.setItem("user-auth-token", res?.data?.id_token);
-        router.push(`/components/todo?display_name=${res.data.display_name}&userkey=${res.data._userkey}`)
-       
-        //router.push('/components/todo')
+        router.push('/components/todo')
 
       }
      
@@ -72,7 +53,7 @@ const router = useRouter()
             
         </div>
         <button onClick={handleSignUp}> Sign up</button>
-        <p className="info">{!response.ok ? response.error.description : ""}</p>
+        <p className="info">{response.ok === false ? response.error.description : ""}</p>
     </div>
   )
 }
