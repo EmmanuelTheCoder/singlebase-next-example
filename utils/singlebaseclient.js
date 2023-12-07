@@ -3,7 +3,7 @@ import createClient from '@singlebase/singlebase-js';
 
 const sbcUrl = process.env.NEXT_PUBLIC_SBC_URL;
 const sbcToken = process.env.NEXT_PUBLIC_SBC_TOKEN;
-
+ 
 
 export const singlebaseClient = async (token) => {
   const SBC_CONFIG  = {
