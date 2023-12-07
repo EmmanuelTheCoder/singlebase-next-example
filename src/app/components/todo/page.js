@@ -1,112 +1,44 @@
 "use client"
-import React, { useEffect, useState, useTransition} from 'react'
-import { useRouter, useSearchParams } from 'next/navigation';
-import { singlebase } from '@/app/utils/singlebaseclient';
+import React, { useEffect, useState} from 'react'
+import { useRouter } from 'next/navigation';
+import { singlebaseClient } from 'utils/singlebaseclient'
 import Image from 'next/image';
 import deleteimg from '/public/images/delete.png';
-import axios from 'axios';
-import createClient from '@singlebase/singlebase-js'
-
-export const dynamic = 'force-dynamic'
-
-const apiKey = process.env.NEXT_PUBLIC_SBC_TOKEN;
-const apiUrl = process.env.NEXT_PUBLIC_SBC_URL;
-
-const getAuthToken = localStorage.getItem("user-auth-token")
-
-
-
-
 
 export default function page() {
-  
-
-//  const searchParams = useSearchParams();
-//  const display_name = searchParams.get('display_name');
-//  const userkey = searchParams.get('userkey');
- 
- 
-
-
 
 const router = useRouter()
 
 
 const [todoTask, setTodoTask] = useState("")
 const [fetchTodo, setFetchTodo] = useState([])
-const [isPending, startTransition] = useTransition()
 
 const [isFetching, setIsFetching] = useState(false)
- 
- async function caller () {
-  const SBC_CONFIG  = {
-    api_url: apiUrl,
-    api_key: apiKey,
-    options: {
-      headers: {
-        "Authorization" : `Bearer ${getAuthToken}`
-      }
-    }
-    
-  }
-  
-  
-  const sbc = createClient(SBC_CONFIG)
 
-  const res = await sbc
-  .collection("todos")
-  .fetch()
+ const fetchAllTodos = async () => {
+  const token = localStorage.getItem("user-auth-token")
 
-  setFetchTodo(res.data);
-}
-
- const fetchAllTasks = async () => {
-  //  await axios ({
-  //   method: "POST",
-  //   url: apiUrl,
-  //   headers: {
-  //       "X-API-KEY": apiKey,
-  //       "Authorization": `Bearer ${getAuthToken}`
-  //   },
-  //   data: {
-  //     action: "db.fetch",
-  //     collection: "todos"
-  //   }
-  // }).then(async (res)  => {
-  //   const data = await res.data.data
-  //   setFetchTodo(data)
-  //   console.log("res from api fetch", data)
-
-    
-  // })
-  
-
+  const singlebase = await singlebaseClient(token)
   const res = await singlebase
   .collection("todos")
-  .fetch()
+  .fetch() 
 
+  console.log("fetch todo", res)
   setFetchTodo(res.data);
 
-  // startTransition(() => {
-  //   router.refresh()
-  // })
+ 
 }
 
 useEffect(() => {
 
-  //caller()
-  fetchAllTasks() 
-  router.refresh()
-
-  // startTransition(() => {
-  //   router.refresh()
-  // })
+  fetchAllTodos()
 
  }, [isFetching])
 
 
-  const addTodo = async () => {
-
+  const createTodo = async () => {
+    const token = localStorage.getItem("user-auth-token")
+    const singlebase = await singlebaseClient(token)
     setIsFetching(true)
 
       const res = await singlebase
@@ -120,11 +52,13 @@ useEffect(() => {
       console.log("add todo", res)
       setTodoTask("")
     
-      
+      router.refresh()
   }
 
   
-  const updateTodo = async(key, val) => {
+  const updateTodo = async (key, val) => {
+    const token = localStorage.getItem("user-auth-token")
+    const singlebase = await singlebaseClient(token)
 
     setIsFetching(true)
 
@@ -140,10 +74,11 @@ useEffect(() => {
      setIsFetching(false)
      
     router.refresh()
-    
   }
 
-  const deleteATask = async (key) => {
+  const deleteTodo = async (key) => {
+    const token = localStorage.getItem("user-auth-token")
+    const singlebase = await singlebaseClient(token)
     setIsFetching(true)
 
     const res = await singlebase 
@@ -153,12 +88,15 @@ useEffect(() => {
     console.log("task deleted", res)
     setIsFetching(false)
 
+    router.refresh()
   }
 
-  const signout = async (id_token) => {
+  const signout = async () => {
+    const token = localStorage.getItem("user-auth-token")
+    const singlebase = await singlebaseClient(token)
     const res = await singlebase
     .auth
-    .signOut(id_token)
+    .signOut()
 
     console.log("signed out", res)
 
@@ -170,21 +108,23 @@ useEffect(() => {
   return (
     <div className='todo-container'>
         <h1>My Todos</h1>
-        
-        <button onClick={() => signout(getAuthToken)}>Signout</button>
 
-        <input type="text" value={todoTask} onChange={(e)=>setTodoTask(e.target.value)}/>
-        <button onClick={addTodo}>Add</button>
+        <div className="btn-container">
+          <button onClick={signout}>Signout</button>
+
+        </div>
+        
+
+        <input type="text" className="todoInput" value={todoTask} onChange={(e)=>setTodoTask(e.target.value)}/>
+        <button className="todoBtn" onClick={createTodo}>Add</button>
         
         {fetchTodo.map(todo => {
          
             return (
               <div key={todo._key} className='todos'>
               
-              
                 <li>{todo.task}</li>
                 
-                <p>{todo.isDone.toString()}</p>
                 <input type="checkbox" 
                   checked={todo.isDone} 
                   
@@ -197,7 +137,7 @@ useEffect(() => {
                     width={20}
                     height={20}
                     alt='delete'
-                    onClick={()=>deleteATask(todo._key)}
+                    onClick={()=>deleteTodo(todo._key)}
                     />
 
                 </div>

@@ -1,18 +1,21 @@
 "use client"
 import React, {useState} from 'react'
 import Link from 'next/link'
-import { singlebase } from '@/app/utils/singlebaseclient'; 
+import { singlebaseClient } from 'utils/singlebaseclient'; 
 import { useRouter } from 'next/navigation';
 
 export default function page() {
     const router = useRouter()
 
+    
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [response, setResponse] = useState("")
-
+    
     const handleSignInWithPassword = async (e) => {
         e.preventDefault()
+        
+        const singlebase = await singlebaseClient()
 
         const res = await singlebase
         .auth
