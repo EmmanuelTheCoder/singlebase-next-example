@@ -1,6 +1,6 @@
 "use client"
 import { useState } from 'react'
-import { singlebaseClient } from "@/app/utils/singlebaseclient"
+import { singlebaseClient } from "utils/singlebaseclient"
 import { useRouter } from 'next/navigation'
 
 
@@ -15,7 +15,7 @@ const router = useRouter()
   const handleSignUp = async (e) => {
     e.preventDefault();
       const singlebase = await singlebaseClient()
- 
+
       const res = await singlebase
       .auth
       .createUserWithPassword({
